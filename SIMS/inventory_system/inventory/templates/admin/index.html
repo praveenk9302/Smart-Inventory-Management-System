@@ -1,0 +1,323 @@
+{% extends "admin/base_site.html" %}
+{% load log %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block extrastyle %}
+
+{{ block.super }}
+<style>
+    /* Hide Django's built-in left nav and its toggle button */
+    #nav-sidebar, #toggle-nav-sidebar {
+        display: none !important;
+    }
+
+    #content {
+        max-width: 1300px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    /* ================= DASHBOARD LAYOUT ================= */
+    .dash-layout {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* ================= SIDEBAR (left, static, not movable) ================= */
+    .dash-sidebar {
+        position: static;
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(16px) saturate(160%);
+        -webkit-backdrop-filter: blur(16px) saturate(160%);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        padding: 18px 14px;
+    }
+
+    .dash-sidebar .side-home {
+        display: block;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #6366f1, #0891b2);
+        color: #fff !important;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+    }
+
+    .dash-sidebar .side-group {
+        margin-bottom: 18px;
+    }
+
+    .dash-sidebar .side-group h3 {
+        margin: 0 0 8px;
+        padding: 0 8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .dash-sidebar .side-group h3 a {
+        color: rgba(255, 255, 255, 0.55) !important;
+        text-decoration: none;
+    }
+
+    .dash-sidebar .side-group h3 a:hover {
+        color: #fff !important;
+    }
+
+    .dash-sidebar ul {
+        list-style: none !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .dash-sidebar ul li {
+        list-style: none !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .dash-sidebar ul li::before,
+    .dash-sidebar ul li::marker {
+        content: none;
+        display: none;
+    }
+
+    .dash-sidebar ul li a {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 9px 12px;
+        border-radius: 10px;
+        color: #e2e8f0 !important;
+        font-size: 0.92rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .dash-sidebar ul li a::after {
+        content: "›";
+        opacity: 0.5;
+    }
+
+    .dash-sidebar ul li a:hover {
+        background: rgba(99, 102, 241, 0.2);
+        color: #fff !important;
+    }
+
+    /* ================= MAIN AREA ================= */
+    .dash-main h1 {
+        text-align: left;
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin: 0 0 20px;
+        color: #fff;
+    }
+
+    .dash-main .module {
+        margin-bottom: 22px !important;
+    }
+
+    .dash-main .module table td a {
+        font-weight: 600;
+    }
+
+    .dash-main .module .view-all {
+        display: block;
+        padding: 12px 20px;
+        text-align: right;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Recent actions */
+    .recent-list {
+        list-style: none;
+        margin: 0;
+        padding: 6px 20px 14px;
+    }
+
+    .recent-list li {
+        padding: 12px 0 12px 28px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        position: relative;
+        color: #e2e8f0;
+        list-style: none;
+    }
+
+    .recent-list li:last-child {
+        border-bottom: none;
+    }
+
+    .recent-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 16px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #22c55e;
+    }
+
+    .recent-list li.change-entry::before { background: #facc15; }
+    .recent-list li.delete-entry::before { background: #ef4444; }
+
+    .recent-list .entry-type {
+        display: block;
+        margin-top: 3px;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.55);
+    }
+
+    .recent-empty {
+        padding: 16px 20px;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Stock status colors */
+    .dash-stock-in  { color: #bbf7d0; font-weight: 600; }
+    .dash-stock-low { color: #fef08a; font-weight: 600; }
+    .dash-stock-out { color: #fecaca; font-weight: 600; }
+
+    /* ================= MOBILE ================= */
+    @media (max-width: 900px) {
+        .dash-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ================= FREEZE HEADER ONLY (dashboard) ================= */
+    #header {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+
+    /* Breadcrumb (Home > Welcome...) scrolls normally */
+    div.breadcrumbs {
+        position: static !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-layout">
+
+    <!-- ============ LEFT SIDEBAR ============ -->
+    <aside class="dash-sidebar">
+        <a class="side-home" href="{% url 'admin:index' %}">🏠 Dashboard</a>
+
+        {% for app in app_list %}
+        <div class="side-group">
+            <h3><a href="{{ app.app_url }}">{{ app.name }}</a></h3>
+            <ul>
+                {% for model in app.models %}
+                <li>
+                    <a href="{{ model.admin_url }}">{{ model.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </aside>
+
+    <!-- ============ MAIN AREA ============ -->
+    <main class="dash-main">
+
+        <!-- Products (default view) -->
+        <div class="module">
+            <h2>Products</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Product ID</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr>
+                        <td><a href="{% url 'admin:inventory_product_change' p.pk %}">{{ p.name }}</a></td>
+                        <td>{{ p.product_id }}</td>
+                        <td>{{ p.price }}</td>
+                        <td>{{ p.stock }}</td>
+                        <td>
+                            {% if p.stock == 0 %}
+                                <span class="dash-stock-out">🔴 Out of stock</span>
+                            {% elif p.stock <= 5 %}
+                                <span class="dash-stock-low">🟡 Low stock</span>
+                            {% else %}
+                                <span class="dash-stock-in">🟢 In stock</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No products yet. <a href="{% url 'admin:inventory_product_add' %}">Add one</a>.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="view-all">
+                <a href="{% url 'admin:inventory_product_changelist' %}">View all products →</a>
+            </div>
+        </div>
+
+        <!-- Recent actions (default view) -->
+        {% get_admin_log 10 as admin_log for_user user %}
+        <div class="module">
+            <h2>Recent actions</h2>
+            {% if admin_log %}
+            <ul class="recent-list">
+                {% for entry in admin_log %}
+                <li class="{% if entry.is_deletion %}delete-entry{% elif entry.is_change %}change-entry{% else %}add-entry{% endif %}">
+                    {% if entry.is_deletion or not entry.get_admin_url %}
+                        {{ entry.object_repr }}
+                    {% else %}
+                        <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                    {% endif %}
+                    <span class="entry-type">
+                        {% if entry.content_type %}{{ entry.content_type.name|capfirst }}{% else %}Unknown{% endif %}
+                        &middot;
+                        {% if entry.is_addition %}Added{% elif entry.is_change %}Changed{% elif entry.is_deletion %}Deleted{% endif %}
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="recent-empty">None available</p>
+            {% endif %}
+        </div>
+    </main>
+
+</div>
+
+<script>
+    // Push the page content below the fixed header only
+    (function () {
+        function setOffset() {
+            var header = document.getElementById('header');
+            var container = document.getElementById('container');
+            if (!header || !container) return;
+            container.style.paddingTop = header.offsetHeight + 'px';
+        }
+        setOffset();
+        window.addEventListener('resize', setOffset);
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,340 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | Inventory System</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0e7490);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating glowing orbs */
+        body::before, body::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.55;
+            pointer-events: none;
+        }
+        body::before {
+            width: 420px; height: 420px;
+            background: #6366f1;
+            top: -120px; left: -100px;
+            animation: float 12s ease-in-out infinite;
+        }
+        body::after {
+            width: 380px; height: 380px;
+            background: #22d3ee;
+            bottom: -120px; right: -80px;
+            animation: float 14s ease-in-out infinite reverse;
+        }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50%      { transform: translate(40px, -30px) scale(1.1); }
+        }
+
+        /* Rising particles */
+        .particle {
+            position: absolute;
+            bottom: -20px;
+            width: 6px; height: 6px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: rise linear infinite;
+            pointer-events: none;
+        }
+        @keyframes rise {
+            0%   { transform: translateY(0) scale(1); opacity: 0; }
+            10%  { opacity: 0.8; }
+            100% { transform: translateY(-110vh) scale(0.4); opacity: 0; }
+        }
+
+        /* Card */
+        .login-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 44px 36px 32px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 24px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            color: #fff;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: cardIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        /* Shimmer sweep */
+        .login-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -75%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.12), transparent);
+            transform: skewX(-20deg);
+            animation: sheen 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes sheen {
+            0%, 60% { left: -75%; }
+            100%    { left: 125%; }
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(40px) scale(0.96); filter: blur(6px); }
+            to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+
+        /* Logo badge */
+        .logo {
+            width: 68px;
+            height: 68px;
+            margin: 0 auto 18px;
+            line-height: 68px;
+            font-size: 32px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #6366f1, #22d3ee);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.5);
+            animation: pulse 2.6s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 30px rgba(99,102,241,0.5); }
+            50%      { transform: scale(1.06); box-shadow: 0 14px 40px rgba(34,211,238,0.6); }
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(90deg, #fff, #c7d2fe, #67e8f9, #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textShine 4s linear infinite, fadeUp 0.8s 0.15s both;
+        }
+        @keyframes textShine {
+            to { background-position: 200% center; }
+        }
+
+        .subtitle {
+            margin: 0 0 28px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.92rem;
+            animation: fadeUp 0.8s 0.25s both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Error */
+        .login-error {
+            background: rgba(239, 68, 68, 0.18);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fecaca;
+            padding: 11px 14px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            font-size: 0.9rem;
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translateX(-2px); }
+            20%, 80% { transform: translateX(4px); }
+            30%, 50%, 70% { transform: translateX(-6px); }
+            40%, 60% { transform: translateX(6px); }
+        }
+
+        /* Form */
+        form {
+            text-align: left;
+            animation: fadeUp 0.8s 0.35s both;
+        }
+
+        label {
+            display: block;
+            margin: 16px 0 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 0.02em;
+        }
+
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 0.97rem;
+            font-family: inherit;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        input::placeholder { color: rgba(255, 255, 255, 0.45); }
+        input:hover { border-color: rgba(255, 255, 255, 0.35); }
+        input:focus {
+            border-color: #22d3ee;
+            background: rgba(255, 255, 255, 0.14);
+            box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.2), 0 0 24px rgba(34, 211, 238, 0.25);
+            transform: translateY(-1px);
+        }
+
+        /* Button */
+        .submit-btn {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            margin-top: 28px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: inherit;
+            color: #fff;
+            background: linear-gradient(135deg, #6366f1, #4f46e5, #0891b2);
+            background-size: 200% 200%;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 12px 28px rgba(79, 70, 229, 0.45);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background-position 0.6s ease;
+        }
+        .submit-btn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+            transition: left 0.7s ease;
+        }
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            background-position: 100% 0;
+            box-shadow: 0 18px 36px rgba(34, 211, 238, 0.4);
+        }
+        .submit-btn:hover::after { left: 120%; }
+        .submit-btn:active { transform: translateY(0) scale(0.98); }
+        .submit-btn:focus-visible {
+            outline: 3px solid rgba(34, 211, 238, 0.6);
+            outline-offset: 3px;
+        }
+
+        .footer {
+            margin: 26px 0 0;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            animation: fadeUp 0.8s 0.5s both;
+        }
+
+        @media (max-width: 480px) {
+            .login-card { padding: 36px 24px 26px; border-radius: 20px; }
+            h1 { font-size: 1.6rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Decorative particles -->
+<span class="particle" style="left:10%; animation-duration:9s; animation-delay:0s;"></span>
+<span class="particle" style="left:25%; animation-duration:12s; animation-delay:2s; width:4px; height:4px;"></span>
+<span class="particle" style="left:45%; animation-duration:10s; animation-delay:1s; width:8px; height:8px;"></span>
+<span class="particle" style="left:65%; animation-duration:14s; animation-delay:3s;"></span>
+<span class="particle" style="left:80%; animation-duration:11s; animation-delay:0.5s; width:5px; height:5px;"></span>
+<span class="particle" style="left:92%; animation-duration:13s; animation-delay:4s;"></span>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="logo">📦</div>
+        <h1>Admin Login</h1>
+        <p class="subtitle">Inventory Management System</p>
+
+        {% if form.errors %}
+            <div class="login-error">
+                Your username and password didn't match. Please try again.
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'admin:login' %}">
+            {% csrf_token %}
+
+            <label for="{{ form.username.id_for_label }}">Username</label>
+            {{ form.username }}
+
+            <label for="{{ form.password.id_for_label }}">Password</label>
+            {{ form.password }}
+
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <button type="submit" class="submit-btn">Log in</button>
+        </form>
+
+        <p class="footer">© 2026 Inventory System</p>
+    </div>
+</div>
+
+<script>
+    // Place particles randomly on each load so they don't look static
+    document.querySelectorAll('.particle').forEach(p => {
+        p.style.animationDuration = (9 + Math.random() * 6) + 's';
+    });
+</script>
+
+</body>
+</html>
