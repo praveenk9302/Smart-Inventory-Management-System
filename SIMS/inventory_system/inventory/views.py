@@ -223,21 +223,6 @@ def alert_view(request):
                 p.predicted_demand = predicted
                 alert_products.append(p)
 
-                def predictions_view(request):
-    products = Product.objects.all()
-
-    predictions = []
-    for product in products:
-        predictions.append({
-            "product": product.name,
-            "stock": product.stock,
-            "prediction": predict_demand(product),
-        })
-
-    return render(request, "inventory/predictions.html", {
-        "predictions": predictions,
-    })
-
         # Fallback alert (no AI data yet)
         else:
             if p.stock <= LOW_STOCK_LIMIT:
@@ -246,4 +231,20 @@ def alert_view(request):
 
     return render(request, "inventory/alerts.html", {
         "alert_products": alert_products
+    })
+
+def products_view(request):
+    products = Product.objects.all()
+
+    predictions = []
+
+    for product in products:
+        predictions.append({
+            "product": product.name,
+            "stock": product.stock,
+            "prediction": predict_demand(product.id),
+        })
+
+    return render(request, "inventory/predictions.html", {
+        "predictions": predictions,
     })
