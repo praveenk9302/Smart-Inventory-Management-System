@@ -1,0 +1,69 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Products</title>
+    <link rel="stylesheet" href="{% static 'inventory/css/style.css' %}">
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+       <!-- 🔹 SIDEBAR -->
+    <div class="sidebar">
+        <h2>📦 Inventory</h2>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a class="active" href="{% url 'products' %}">Products</a>
+        <a href="{% url 'sales' %}">Sales</a>
+        <a href="{% url 'alerts' %}">Alerts 🔔</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+   
+
+    <!-- MAIN CONTENT -->
+    <main class="content">
+        <h1>📋 Product List</h1>
+
+        <table class="product-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Stock</th>
+                    <th>Sold</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in products %}
+                <tr>
+                    <td>{{ p.product_id }}</td>
+                    <td>{{ p.name }}</td>
+                    <td class="{% if p.stock < 5 %}low-stock{% endif %}">
+                        {{ p.stock }}
+                    </td>
+                    <td>{{ p.sold_count }}</td>
+                    <td>
+                        {% if p.stock < 5 %}
+                            <span class="status danger">Low Stock</span>
+                        {% else %}
+                            <span class="status ok">Available</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No products found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+
+</div>
+
+</body>
+</html>

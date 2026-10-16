@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | Inventory System</title>
+
+    <!-- USE EXISTING style.css -->
+    <link rel="stylesheet" href="{% static 'inventory/css/style.css' %}">
+</head>
+<body class="login-body">
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <h2>Inventory Login</h2>
+        <p class="login-subtitle">AI Inventory Management System</p>
+
+        {% if error %}
+            <div class="login-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <label>Username</label>
+            <input type="text" name="username" placeholder="Enter username" required>
+
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Enter password" required>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p class="login-footer">© 2026 Inventory System</p>
+    </div>
+</div>
+
+</body>
+</html>

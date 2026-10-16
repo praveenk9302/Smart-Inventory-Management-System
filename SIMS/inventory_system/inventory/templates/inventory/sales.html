@@ -1,0 +1,61 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+
+<h2>🧾 Sales Page</h2>
+
+{% for message in messages %}
+    <p style="color:red;">{{ message }}</p>
+{% endfor %}
+
+<table>
+    <tr>
+        <th>Product ID</th>
+        <th>Name</th>
+        <th>Stock</th>
+        <th>Sold</th>
+        <th>Sell Quantity</th>
+        <th>Action</th>
+    </tr>
+
+    {% for product in products %}
+    <tr>
+        <td>{{ product.product_id }}</td>
+        <td>{{ product.name }}</td>
+        <td>{{ product.stock }}</td>
+        <td>{{ product.sold_count }}</td>
+        <td>
+            <form id="sell-{{ product.id }}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+                <input type="number" name="quantity" min="1" required>
+            </form>
+        </td>
+        <td>
+            <button type="submit" form="sell-{{ product.id }}">Sell</button>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br><br>
+
+<h3>AI Demand Prediction</h3>
+
+<table>
+    <tr>
+        <th>Product</th>
+        <th>Current Stock</th>
+        <th>Predicted Demand</th>
+    </tr>
+
+    {% for p in predictions %}
+    <tr>
+        <td>{{ p.product }}</td>
+        <td>{{ p.stock }}</td>
+        <td>{{ p.prediction }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

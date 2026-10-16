@@ -1,0 +1,47 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Low Stock Alerts</title>
+    <style>
+        body { font-family: Arial; }
+        table { border-collapse: collapse; width: 70%; }
+        th, td { padding: 10px; border: 1px solid black; text-align: center; }
+        th { background-color: #333; color: white; }
+        .alert { background-color: #f7d4d4; }
+    </style>
+</head>
+<body>
+
+<h2>🔔 Low Stock Alert Page</h2>
+
+{% if alert_products %}
+<table>
+    <tr>
+        <th>Product</th>
+        <th>Current Stock</th>
+        <th>Predicted Demand</th>
+        <th>Status</th>
+    </tr>
+
+    {% for p in alert_products %}
+    <tr class="alert">
+        <td>{{ p.name }}</td>
+        <td>{{ p.stock }}</td>
+        <td>{{ p.predicted_demand }}</td>
+        <td>⚠️ Restock Needed</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>✅ No low stock alerts. All good!</p>
+{% endif %}
+
+<br>
+<a href="{% url 'dashboard' %}">⬅ Back to Dashboard</a>
+
+</body>
+</html>
+{% endblock %}

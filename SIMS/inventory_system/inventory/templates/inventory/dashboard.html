@@ -1,0 +1,292 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+
+    <link rel="stylesheet" href="{% static 'inventory/css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
+    
+    <style>
+        /* Floating Scan Button */
+        .scan-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            color: #fff;
+            border: none;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .scan-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Modal */
+        .scan-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scan-content {
+            background: #fff;
+            width: 420px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .scan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #1e293b;
+            color: white;
+        }
+
+        .scan-header span {
+            cursor: pointer;
+            font-size: 22px;
+        }
+
+        #scanner {
+            width: 100%;
+            height: 300px;
+            background: black;
+        }
+    </style>
+</head>
+
+<body>
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2>📦 Inventory</h2>
+        <a class="active" href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'products' %}">Products</a>
+        <a href="{% url 'sales' %}">Sales</a>
+        <a href="{% url 'alerts' %}">Alerts 🔔</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="content">
+
+        <h1>Dashboard</h1>
+
+        <!-- STATS -->
+        <div class="cards">
+            <div class="card">
+                <h3>Total Products</h3>
+                <p>{{ total_products }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Top Seller</h3>
+                <p>
+                    {% if top_seller %}
+                     {{ top_seller.name }}
+                    {% else %}
+                        None
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>Low Stock Items</h3>
+                <p>{{ low_stock_count }}</p>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <h2>🔥 Top Selling Products</h2>
+            <table class="table">
+                <b>
+    <thead style="background:#bcd0ff; color:rgb(0, 0, 0);"></b>
+    <tr>
+        <th>Product ID</th>
+        <th>Name</th>
+        <th>Stock</th>
+        <th>Sold</th>
+    </tr>
+
+    {% for product in top_selling_products %}
+    <tr>
+        <!-- Real Product ID -->
+        <td>{{ product.product_id }}</td>
+
+        <!-- Product Name -->
+        <td>{{ product.name }}</td>
+
+        <!-- Stock (red if low) -->
+        {% if product.stock <= 5 %}
+            <td style="color:red; font-weight:bold;">
+                {{ product.stock }}
+            </td>
+        {% else %}
+            <td>{{ product.stock }}</td>
+        {% endif %}
+
+        <!-- Sold count -->
+        <td>{{ product.sold_count }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4" style="text-align:center;">
+            No top selling products found.
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+
+        <!-- ================= SALES ANALYTICS (FIXED) ================= -->
+
+        <h3>📊 Sales Analytics</h3>
+
+        <!-- ✅ ONLY ONE CANVAS -->
+        <canvas id="salesChart" height="70"></canvas>
+
+        <!-- ✅ ONLY ONE JSON SCRIPT -->
+        <script id="chart-data" type="application/json">
+            {{ chart_data|safe }}
+        </script>        
+
+    </main>
+</div>
+
+<script id="chart-data" type="application/json">
+    {{ chart_data|safe }}
+</script>
+
+
+
+<!-- FLOATING BUTTON -->
+<button id="scanBtn" class="scan-btn">📸 Scan</button>
+
+<!-- MODAL -->
+<!-- Scanner Modal -->
+<div id="scanModal" class="scan-modal">
+    <div class="scan-content">
+        <div class="scan-header">
+            <h3>Scan Product Barcode</h3>
+            <span id="closeScan">&times;</span>
+        </div>
+
+        <div id="scanner"></div>
+
+        <div class="scan-result">
+            <p>Product: <b id="productName">-</b></p>
+            <p>Stock Left: <b id="productStock">-</b></p>
+            <p id="scanStatus"></p>
+        </div>
+    </div>
+</div>
+
+
+<script>
+const chartJson = JSON.parse(
+    document.getElementById("chart-data").textContent
+);
+
+const labels = chartJson.map(p => p.name);
+const soldData = chartJson.map(p => p.sold);
+
+const ctx = document.getElementById("salesChart").getContext("2d");
+
+const salesChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+        labels: labels,
+        datasets: [{
+            label: "Products Sold",
+            data: soldData,
+            backgroundColor: "#4f46e5"
+        }]
+    },
+    options: {
+        responsive: true,
+        animation: true
+    }
+});
+</script>
+
+
+
+<script>
+const scanBtn = document.getElementById("scanBtn");
+const scanModal = document.getElementById("scanModal");
+const closeScan = document.getElementById("closeScan");
+
+scanBtn.onclick = () => {
+    scanModal.style.display = "flex";
+
+    Quagga.init({
+        inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: document.querySelector('#scanner'),
+            constraints: { facingMode: "environment" }
+        },
+        decoder: {
+            readers: ["code_128_reader", "ean_reader", "ean_8_reader"]
+        }
+    }, err => {
+        if (!err) Quagga.start();
+    });
+
+    Quagga.onDetected(data => {
+        Quagga.stop();
+        scanModal.style.display = "none";
+        sendBarcode(data.codeResult.code);
+    });
+};
+
+closeScan.onclick = () => {
+    Quagga.stop();
+    scanModal.style.display = "none";
+};
+
+function sendBarcode(barcode) {
+    fetch("/scan-barcode/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({ barcode })
+    })
+    .then(r => r.json())
+    .then(() => location.reload());
+}
+
+function getCookie(name) {
+    return document.cookie
+        .split('; ')
+        .find(row => row.startsWith(name))
+        ?.split('=')[1];
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
+</html>

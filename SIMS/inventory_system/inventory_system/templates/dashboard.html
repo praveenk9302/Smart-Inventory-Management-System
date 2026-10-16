@@ -1,0 +1,6 @@
+<h2>Low Stock Alerts</h2>
+<ul>
+{% for p in low_stock %}
+<li>{{ p.name }} – Remaining: {{ p.remaining_stock }}</li>
+{% endfor %}
+</ul>
