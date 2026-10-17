@@ -19,10 +19,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+# SECURITY WARNING: don't run with debug turned on in production!
+# Render sets the RENDER variable automatically, so DEBUG is False there
+# and True on your PC.
+DEBUG = os.environ.get('RENDER') is None
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('RENDER') is None
+
+if not SECRET_KEY:
+    if DEBUG:
+        # Local development only. Render never uses this branch.
+        SECRET_KEY = 'django-insecure-local-dev-key-only'
+    else:
+        raise RuntimeError(
+            'DJANGO_SECRET_KEY environment variable is not set on Render.'
+        )
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
