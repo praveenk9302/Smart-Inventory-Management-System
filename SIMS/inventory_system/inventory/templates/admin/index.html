@@ -236,7 +236,7 @@
     <!-- ============ MAIN AREA ============ -->
     <main class="dash-main">
 
-        <!-- Products (default view) -->
+        <!-- Products (low stock, below 20) -->
         <div class="module">
             <h2>Products</h2>
             <table>
@@ -268,7 +268,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5">No products yet. <a href="{% url 'admin:inventory_product_add' %}">Add one</a>.</td>
+                        <td colspan="5">All products have 20 or more in stock.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -74,12 +74,18 @@ class SalesHistoryAdmin(admin.ModelAdmin):
     list_per_page = 25
 
 
-    # ================= ADMIN HOME PAGE: show products first =================
+# ================= ADMIN HOME PAGE: show only low-stock products =================
+LOW_STOCK_THRESHOLD = 20  # change this number to adjust the dashboard rule
+
 _original_admin_index = admin.site.index
+
 
 def admin_index_with_products(request, extra_context=None):
     extra_context = extra_context or {}
-    extra_context["products"] = Product.objects.order_by("name")[:10]
+    extra_context["products"] = Product.objects.filter(
+        stock__lt=LOW_STOCK_THRESHOLD
+    ).order_by("stock", "name")
     return _original_admin_index(request, extra_context)
+
 
 admin.site.index = admin_index_with_products
